@@ -1,0 +1,12 @@
+package xyz.erupt.pulse.pulse;
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+
+@Target({ElementType.TYPE})
+@Retention(java.lang.annotation.RetentionPolicy.RUNTIME)
+@Documented
+public @interface Pulse {
+}
