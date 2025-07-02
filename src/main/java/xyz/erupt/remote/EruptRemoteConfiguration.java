@@ -16,15 +16,15 @@ import xyz.erupt.core.module.ModuleInfo;
 @EntityScan
 @EnableConfigurationProperties
 @Component
-public class PulseConfiguration implements EruptModule {
+public class EruptRemoteConfiguration implements EruptModule {
 
     static {
-        EruptModuleInvoke.addEruptModule(PulseConfiguration.class);
+        EruptModuleInvoke.addEruptModule(EruptRemoteConfiguration.class);
     }
 
     @Override
     public ModuleInfo info() {
-        return ModuleInfo.builder().name("erupt-pulse").build();
+        return ModuleInfo.builder().name("erupt-remote").build();
     }
 
 }
