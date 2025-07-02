@@ -1,4 +1,4 @@
-package xyz.erupt.pulse;
+package xyz.erupt.remote;
 
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;

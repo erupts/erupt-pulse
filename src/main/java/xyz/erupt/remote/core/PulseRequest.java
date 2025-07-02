@@ -1,12 +1,11 @@
-package xyz.erupt.pulse.pulse;
+package xyz.erupt.remote.core;
 
 import cn.hutool.core.util.IdUtil;
-import xyz.erupt.pulse.util.HardwareUtil;
-import xyz.erupt.pulse.util.ProjectX;
 import io.vertx.core.net.NetSocket;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import xyz.erupt.remote.util.HardwareUtil;
 
 import java.util.Map;
 
@@ -25,8 +24,6 @@ public class PulseRequest {
     private String machineId = MACHINE_ID;
 
     private long requestId = IdUtil.getSnowflakeNextId();
-
-    private String version = ProjectX.getVersion();
 
     private Integer port;
 

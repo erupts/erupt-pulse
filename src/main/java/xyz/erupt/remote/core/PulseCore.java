@@ -1,8 +1,6 @@
-package xyz.erupt.pulse.pulse;
+package xyz.erupt.remote.core;
 
-import xyz.erupt.pulse.annotation.Path;
-import xyz.erupt.pulse.annotation.Pulse;
-import xyz.erupt.pulse.controller.UnitXException;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.net.NetSocket;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
@@ -11,6 +9,8 @@ import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.core.type.filter.TypeFilter;
 import xyz.erupt.core.config.GsonFactory;
 import xyz.erupt.core.util.EruptSpringUtil;
+import xyz.erupt.remote.annotation.Path;
+import xyz.erupt.remote.annotation.Pulse;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -24,6 +24,8 @@ public class PulseCore {
 
     // <path,method>
     private final Map<String, Method> pulsePathMethodMap = new HashMap<>();
+
+    private final StringBuilder buffer = new StringBuilder();
 
     @Resource
     private ServerProperties serverProperties;
@@ -43,16 +45,33 @@ public class PulseCore {
         });
     }
 
+    public void handler(NetSocket socket, Buffer data) {
+        buffer.append(data.toString());
+        String delimiter = PulseRequest.PULSE_PACK_SPLIT;
+        int index;
+        while ((index = buffer.indexOf(delimiter)) != -1) {
+            String jsonStr = buffer.substring(0, index);
+            buffer.delete(0, index + delimiter.length());
+            try {
+                PulseRequest pulseRequest = GsonFactory.getGson().fromJson(jsonStr, PulseRequest.class);
+                pulseRequest.setNetSocket(socket);
+                this.call(pulseRequest);
+            } catch (Exception e) {
+                log.error("Error parsing PulseRequest: {}", e.getMessage());
+            }
+        }
+    }
+
     public void call(PulseRequest pulseRequest) {
         Method method = pulsePathMethodMap.get(pulseRequest.getPath());
         if (null == method) {
-            throw new UnitXException("Pulse path not found: " + pulseRequest.getPath());
+            throw new RuntimeException("Pulse path not found: " + pulseRequest.getPath());
         }
         try {
             method.invoke(EruptSpringUtil.getBean(method.getDeclaringClass()), pulseRequest);
         } catch (Exception e) {
             log.error("Pulse call error: ", e);
-            throw new UnitXException("Pulse call error: " + e.getMessage());
+            throw new RuntimeException("Pulse call error: " + e.getMessage());
         }
     }
 
