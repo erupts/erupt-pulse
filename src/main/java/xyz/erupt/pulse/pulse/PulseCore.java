@@ -1,5 +1,7 @@
 package xyz.erupt.pulse.pulse;
 
+import xyz.erupt.pulse.annotation.Path;
+import xyz.erupt.pulse.annotation.Pulse;
 import xyz.erupt.pulse.controller.UnitXException;
 import io.vertx.core.net.NetSocket;
 import lombok.extern.slf4j.Slf4j;
