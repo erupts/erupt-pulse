@@ -1,4 +1,4 @@
-package xyz.erupt.remote.core;
+package xyz.erupt.remote.pulse;
 
 import cn.hutool.core.util.IdUtil;
 import io.vertx.core.net.NetSocket;

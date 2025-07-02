@@ -1,6 +1,5 @@
-package xyz.erupt.remote.core;
+package xyz.erupt.remote.pulse;
 
-import io.vertx.core.buffer.Buffer;
 import io.vertx.core.net.NetSocket;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
@@ -8,6 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.core.type.filter.TypeFilter;
 import xyz.erupt.core.config.GsonFactory;
+import xyz.erupt.core.service.EruptApplication;
 import xyz.erupt.core.util.EruptSpringUtil;
 import xyz.erupt.remote.annotation.Path;
 import xyz.erupt.remote.annotation.Pulse;
@@ -25,15 +25,12 @@ public class PulseCore {
     // <path,method>
     private final Map<String, Method> pulsePathMethodMap = new HashMap<>();
 
-    private final StringBuilder buffer = new StringBuilder();
-
     @Resource
     private ServerProperties serverProperties;
 
     @PostConstruct
     public void init() {
-        int index = PulseCore.class.getPackageName().lastIndexOf(".common");
-        EruptSpringUtil.scannerPackage(new String[]{PulseCore.class.getPackageName().substring(0, index)}, new TypeFilter[]{
+        EruptSpringUtil.scannerPackage(EruptApplication.getScanPackage(), new TypeFilter[]{
                 new AnnotationTypeFilter(Pulse.class)
         }, clazz -> {
             for (Method method : clazz.getMethods()) {
@@ -45,21 +42,25 @@ public class PulseCore {
         });
     }
 
-    public void handler(NetSocket socket, Buffer data) {
-        buffer.append(data.toString());
-        String delimiter = PulseRequest.PULSE_PACK_SPLIT;
-        int index;
-        while ((index = buffer.indexOf(delimiter)) != -1) {
-            String jsonStr = buffer.substring(0, index);
-            buffer.delete(0, index + delimiter.length());
-            try {
-                PulseRequest pulseRequest = GsonFactory.getGson().fromJson(jsonStr, PulseRequest.class);
-                pulseRequest.setNetSocket(socket);
-                this.call(pulseRequest);
-            } catch (Exception e) {
-                log.error("Error parsing PulseRequest: {}", e.getMessage());
+
+    public void handler(NetSocket socket) {
+        StringBuilder buffer = new StringBuilder();
+        socket.handler(data -> {
+            buffer.append(data.toString());
+            String delimiter = PulseRequest.PULSE_PACK_SPLIT;
+            int index;
+            while ((index = buffer.indexOf(delimiter)) != -1) {
+                String jsonStr = buffer.substring(0, index);
+                buffer.delete(0, index + delimiter.length());
+                try {
+                    PulseRequest pulseRequest = GsonFactory.getGson().fromJson(jsonStr, PulseRequest.class);
+                    pulseRequest.setNetSocket(socket);
+                    this.call(pulseRequest);
+                } catch (Exception e) {
+                    log.error("Error parsing PulseRequest: {}", e.getMessage());
+                }
             }
-        }
+        });
     }
 
     public void call(PulseRequest pulseRequest) {
