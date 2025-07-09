@@ -1,6 +1,7 @@
 package xyz.erupt.remote.pulse;
 
 import io.vertx.core.net.NetSocket;
+import io.vertx.core.parsetools.RecordParser;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.context.annotation.Configuration;
@@ -15,6 +16,7 @@ import xyz.erupt.remote.annotation.Pulse;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -44,21 +46,15 @@ public class PulseCore {
 
 
     public void handler(NetSocket socket) {
-        StringBuilder buffer = new StringBuilder();
-        socket.handler(data -> {
-            buffer.append(data.toString());
-            String delimiter = PulseRequest.PULSE_PACK_SPLIT;
-            int index;
-            while ((index = buffer.indexOf(delimiter)) != -1) {
-                String jsonStr = buffer.substring(0, index);
-                buffer.delete(0, index + delimiter.length());
-                try {
-                    PulseRequest pulseRequest = GsonFactory.getGson().fromJson(jsonStr, PulseRequest.class);
-                    pulseRequest.setNetSocket(socket);
-                    this.call(pulseRequest);
-                } catch (Exception e) {
-                    log.error("Error parsing PulseRequest: {}", e.getMessage());
-                }
+        RecordParser parser = RecordParser.newDelimited(PulseRequest.PULSE_PACK_SPLIT, socket);
+        parser.handler(data -> {
+            String jsonStr = data.toString(StandardCharsets.UTF_8);
+            try {
+                PulseRequest pulseRequest = GsonFactory.getGson().fromJson(jsonStr, PulseRequest.class);
+                pulseRequest.setNetSocket(socket);
+                this.call(pulseRequest);
+            } catch (Exception e) {
+                log.error("Error parsing PulseRequest: {}", e.getMessage());
             }
         });
     }
