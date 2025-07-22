@@ -1,24 +1,52 @@
 package xyz.erupt.remote.util;
 
 import cn.hutool.crypto.digest.DigestUtil;
+import lombok.SneakyThrows;
 import oshi.SystemInfo;
 import oshi.hardware.HWDiskStore;
 import oshi.hardware.HWPartition;
 import oshi.hardware.HardwareAbstractionLayer;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.List;
 
 public class HardwareUtil {
+
+    public static void main(String[] args) {
+        getMachineId();
+    }
 
     public static String getMachineId() {
         SystemInfo si = new SystemInfo();
         HardwareAbstractionLayer hal = si.getHardware();
         for (HWDiskStore diskStore : hal.getDiskStores()) {
             if (isLocalDisk(diskStore)) {
-                return DigestUtil.sha256Hex(diskStore.getSerial());
+                String serial = diskStore.getSerial();
+                if ("unknown".equalsIgnoreCase(serial)) {
+                    serial = getSerialFromUdevadm(diskStore.getName());  // e.g., /dev/sda
+                }
+                return DigestUtil.sha256Hex(serial);
             }
         }
         throw new RuntimeException("No local disk found to generate machine ID");
+    }
+
+    @SneakyThrows
+    public static String getSerialFromUdevadm(String device) {
+        Process process = new ProcessBuilder("/usr/bin/udevadm", "info", "--query=all", "--name=" + device)
+                .redirectErrorStream(true)
+                .start();
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.startsWith("E: ID_SERIAL_SHORT=")) {
+                    return line.substring("E: ID_SERIAL_SHORT=".length()).trim();
+                }
+            }
+        }
+        throw new RuntimeException("No serial number found for device " + device);
     }
 
     public static boolean isLocalDisk(HWDiskStore diskStore) {
