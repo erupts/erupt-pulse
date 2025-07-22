@@ -8,15 +8,10 @@ import oshi.hardware.HWPartition;
 import oshi.hardware.HardwareAbstractionLayer;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.List;
 
 public class HardwareUtil {
-
-    public static void main(String[] args) {
-        getMachineId();
-    }
 
     public static String getMachineId() {
         SystemInfo si = new SystemInfo();
@@ -35,9 +30,11 @@ public class HardwareUtil {
 
     @SneakyThrows
     public static String getSerialFromUdevadm(String device) {
-        Process process = new ProcessBuilder("/usr/bin/udevadm", "info", "--query=all", "--name=" + device)
+        String command = "udevadm info --query=all --name=" + device;
+        Process process = new ProcessBuilder("bash", "-c", command)
                 .redirectErrorStream(true)
                 .start();
+
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
             String line;
             while ((line = reader.readLine()) != null) {
@@ -46,6 +43,7 @@ public class HardwareUtil {
                 }
             }
         }
+
         throw new RuntimeException("No serial number found for device " + device);
     }
 
