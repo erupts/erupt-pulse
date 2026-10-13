@@ -1,6 +1,5 @@
-package xyz.erupt.remote.util;
+package xyz.erupt.pulse.util;
 
-import cn.hutool.crypto.digest.DigestUtil;
 import lombok.SneakyThrows;
 import oshi.SystemInfo;
 import oshi.hardware.HWDiskStore;
@@ -9,10 +8,14 @@ import oshi.hardware.HardwareAbstractionLayer;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.util.HexFormat;
 import java.util.List;
 
 public class HardwareUtil {
 
+    @SneakyThrows
     public static String getMachineId() {
         SystemInfo si = new SystemInfo();
         HardwareAbstractionLayer hal = si.getHardware();
@@ -22,7 +25,7 @@ public class HardwareUtil {
                 if ("unknown".equalsIgnoreCase(serial)) {
                     serial = getSerialFromUdevadm(diskStore.getName());  // e.g., /dev/sda
                 }
-                return DigestUtil.sha256Hex(serial);
+                return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(serial.getBytes(StandardCharsets.UTF_8)));
             }
         }
         throw new RuntimeException("No local disk found to generate machine ID");
