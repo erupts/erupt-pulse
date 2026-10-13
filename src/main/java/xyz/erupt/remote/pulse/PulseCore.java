@@ -13,8 +13,8 @@ import xyz.erupt.core.util.EruptSpringUtil;
 import xyz.erupt.remote.annotation.Path;
 import xyz.erupt.remote.annotation.Pulse;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;

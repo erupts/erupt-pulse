@@ -1,0 +1,10 @@
+__pycache__/
+*.egg-info/
+*.db
+dist/
+build/
+target/
+*.mv.db
+*.trace.db
+.idea/
+*.iml
