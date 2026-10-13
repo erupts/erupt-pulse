@@ -1,1 +1,1 @@
-# erupt-remote
+# erupt-pulse

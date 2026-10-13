@@ -24,7 +24,7 @@ public class EruptRemoteConfiguration implements EruptModule {
 
     @Override
     public ModuleInfo info() {
-        return ModuleInfo.builder().name("erupt-remote").build();
+        return ModuleInfo.builder().name("erupt-pulse").build();
     }
 
 }
