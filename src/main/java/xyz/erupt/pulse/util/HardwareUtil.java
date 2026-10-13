@@ -1,4 +1,4 @@
-package xyz.erupt.remote.util;
+package xyz.erupt.pulse.util;
 
 import lombok.SneakyThrows;
 import oshi.SystemInfo;

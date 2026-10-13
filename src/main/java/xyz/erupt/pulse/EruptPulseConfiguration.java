@@ -1,4 +1,4 @@
-package xyz.erupt.remote;
+package xyz.erupt.pulse;
 
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -16,10 +16,10 @@ import xyz.erupt.core.module.ModuleInfo;
 @EntityScan
 @EnableConfigurationProperties
 @Component
-public class EruptRemoteConfiguration implements EruptModule {
+public class EruptPulseConfiguration implements EruptModule {
 
     static {
-        EruptModuleInvoke.addEruptModule(EruptRemoteConfiguration.class);
+        EruptModuleInvoke.addEruptModule(EruptPulseConfiguration.class);
     }
 
     @Override

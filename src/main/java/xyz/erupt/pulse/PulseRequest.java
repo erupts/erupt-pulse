@@ -1,11 +1,11 @@
-package xyz.erupt.remote.pulse;
+package xyz.erupt.pulse;
 
 import cn.hutool.core.util.IdUtil;
 import io.vertx.core.net.NetSocket;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import xyz.erupt.remote.util.HardwareUtil;
+import xyz.erupt.pulse.util.HardwareUtil;
 
 import java.util.Map;
 
